@@ -1,5 +1,6 @@
 package com.enceladus.enceladus.controller;
 
+import com.enceladus.enceladus.dto.ApiResponse;
 import com.enceladus.enceladus.dto.SignInRequest;
 import com.enceladus.enceladus.dto.SignInResponce;
 import com.enceladus.enceladus.dto.SignUpRequest;
@@ -21,9 +22,9 @@ public class AuthController {
         this.authService = authService;
     }
     @PostMapping("/signup")
-    public ResponseEntity<apiResponse> registerUser(@Valid @RequestBody SignUpRequest signUpRequest) {
+    public ResponseEntity<ApiResponse> registerUser(@Valid @RequestBody SignUpRequest signUpRequest) {
         authService.registerUser(signUpRequest);
-        return ResponseEntity.ok(new apiResponse(true, "User Registered Successfully"));
+        return ResponseEntity.ok(new ApiResponse(true, "User Registered Successfully"));
     }
     @PostMapping("/signin")
     public ResponseEntity<SignInResponce> authenticateUser(@Valid @RequestBody SignInRequest signInRequest) {
