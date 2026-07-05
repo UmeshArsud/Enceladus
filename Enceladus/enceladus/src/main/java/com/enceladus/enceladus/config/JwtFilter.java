@@ -1,6 +1,10 @@
 package com.enceladus.enceladus.config;
 
 import com.enceladus.enceladus.service.JwtService;
+import com.enceladus.enceladus.service.TokenBlacklistService;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,63 +17,72 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.security.SignatureException;
 
-public class JwtFilterChain extends OncePerRequestFilter {
+@Component
+public class JwtFilter extends OncePerRequestFilter {
 
-    private static final Logger log = LoggerFactory.getLogger(JwtFilterChain.class);
+    private static final Logger log = LoggerFactory.getLogger(JwtFilter.class);
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+    private final TokenBlacklistService tokenBlacklistService;
 
-    public JwtFilterChain(JwtService jwtService, UserDetailsService userDetailsService) {
+    public JwtFilter(JwtService jwtService, UserDetailsService userDetailsService,
+                     TokenBlacklistService tokenBlacklistService) {
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
+        this.tokenBlacklistService = tokenBlacklistService;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
-        if(authHeader == null || !authHeader.startsWith("Bearer ")) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
         String token = authHeader.substring(7).trim();
-        //reject empty token right away instead of passing "" downstream
-        if(token.isEmpty()) {
+        // reject empty token right away instead of passing "" downstream
+        if (token.isEmpty()) {
             filterChain.doFilter(request, response);
             return;
         }
-        try{
+        // logged-out tokens are rejected even if not yet expired
+        if (tokenBlacklistService.isBlacklisted(token)) {
+            log.debug("Rejected blacklisted (logged-out) token");
+            filterChain.doFilter(request, response);
+            return;
+        }
+        try {
             String username = jwtService.extractUserName(token);
-            if(username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                if(jwtService.validateToken(token, userDetails)) {
+                if (jwtService.validateToken(token, userDetails)) {
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             userDetails, null, userDetails.getAuthorities()
                     );
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
-                }else {
+                } else {
                     log.debug("JwtToken Failed Validation For User: {}", username);
                 }
             }
-        }catch (ExpiredJwtException e) {
+        } catch (ExpiredJwtException e) {
             log.debug("JwtExpired: {}", e.getMessage());
             // Don't set authentication — request proceeds unauthenticated,
             // Spring Security's access rules will return 401/403 as appropriate.
-        }catch (UnsupportedJwtException | MalformedJwtException | SignatureException e) {
+        } catch (UnsupportedJwtException | MalformedJwtException e) {
             log.warn("Invalid Jwt: {}", e.getMessage());
-        }catch (UsernameNotFoundException e) {
+        } catch (UsernameNotFoundException e) {
             log.warn("Jwt Referenced Unknown User: {}", e.getMessage());
-        }catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             log.warn("Jwt Claims String IS Empty or Invalid: {}", e.getMessage());
-        }catch (Exception e) {
+        } catch (Exception e) {
             log.error("Unexpected error While Proccessing JWT...!!!", e);
         }
         filterChain.doFilter(request, response);
     }
-
 }

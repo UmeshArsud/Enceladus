@@ -7,13 +7,15 @@ public class ApiError {
     private final String message;
     private final long timeStamp = System.currentTimeMillis();
 
-    public ApiError(String message){
+    public ApiError(String message) {
         this.message = message;
     }
-    public String getMessage(){
+
+    public String getMessage() {
         return message;
     }
-    public long getTimeStamp(){
+
+    public long getTimeStamp() {
         return timeStamp;
     }
 }
