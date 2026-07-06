@@ -1,0 +1,113 @@
+*{
+    padding: 0px;
+    margin: 0px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.top-div{
+    height: 10vh;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: rgb(120, 130, 130);
+}
+.name-logo{
+    padding: 5vh;
+}
+.name-logo:hover{
+    cursor: pointer;
+}
+.header-option{
+    padding: 4vh;
+    display: flex;
+}
+.header-op{
+    font-size: x-large;
+    padding: 2vh;
+}
+.header-op:hover{
+    cursor: pointer;
+}
+.register-main-div{
+
+}
+.register-sub-div{
+    display: flex;
+}
+.left-side-div{
+    font-style: italic;
+    height: 80vh;
+    width: 50%;
+    color: white;
+    font-size: xx-large;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    background-color: rgb(46, 45, 45);
+
+
+}
+.right-side-div{
+    height: 80vh;
+    background-color: rgb(36, 36, 36);
+    width: 50%;
+
+}
+.right-side-div{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.right-side-sub-div{
+    padding-top: 5vh;
+}
+.main-feild{
+    margin: 1vh;
+    display: flex;
+    flex-direction: column;
+
+}
+.input-lable-feild{
+    padding-bottom: 4px;
+    color: white;
+    padding-left: 2vh;
+
+}
+.input-feild{
+    height: 3vh;
+    width: 55vh;
+    color: white;
+    padding-left: 2vh;
+    padding-bottom: 1vh;
+    font-size: 1rem;
+    background-color: rgb(35, 34, 34);
+    padding-top: 1vh;
+    border: 2px solid rgb(78, 69, 69);
+    border-radius: 5vh;
+}
+.input-feild:hover{
+    cursor: pointer;
+}
+.bottom-div{
+    height: 50vh;
+    background-color: rgb(29, 28, 28);
+
+}
+.bottom-sub-div{
+    display: flex;
+    justify-content: center;
+}
+.foot-main{
+    font-style: italic;
+    padding-bottom: 2vh;
+}
+.foot-div{
+    color: white;
+    margin: 14vh ;
+}
+.right{
+    color: aliceblue;
+    text-align: center;
+}
